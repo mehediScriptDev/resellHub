@@ -1,52 +1,51 @@
 import Link from "next/link";
-import { Globe, Mail, MessageCircle, Phone } from "lucide-react";
+import { Globe, Mail, Phone } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-muted text-muted-foreground border-t mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-primary text-primary-foreground border-t border-primary mt-auto">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <Link href="/" className="text-2xl font-bold text-foreground mb-4 block">
-              ReSell<span className="text-primary">Hub</span>
+            <Link href="/" className="text-xl font-extrabold text-white flex items-center gap-1 mb-3">
+              <div className="w-6 h-6 bg-secondary text-secondary-foreground rounded-full flex items-center justify-center font-black text-xs">R</div>
+              ReSellHub
             </Link>
-            <p className="text-sm">
-              Your trusted marketplace for buying and selling pre-owned products. Reduce waste and find great deals.
+            <p className="text-xs text-white/80 leading-relaxed">
+              The most trusted marketplace in Bangladesh. Buy and sell your pre-owned items safely and efficiently.
             </p>
           </div>
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
-              <li><Link href="/products" className="hover:text-primary transition-colors">Products</Link></li>
-              <li><Link href="/categories" className="hover:text-primary transition-colors">Categories</Link></li>
-              <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+            <h3 className="text-white font-bold mb-4 text-sm">Quick Links</h3>
+            <ul className="space-y-2 text-xs text-white/80">
+              <li><Link href="/" className="hover:text-white hover:underline transition-all">Home</Link></li>
+              <li><Link href="/products" className="hover:text-white hover:underline transition-all">All Ads</Link></li>
+              <li><Link href="/dashboard/seller/add-product" className="hover:text-white hover:underline transition-all">Post an Ad</Link></li>
             </ul>
           </div>
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Support</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
-              <li><Link href="/faq" className="hover:text-primary transition-colors">FAQ</Link></li>
-              <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+            <h3 className="text-white font-bold mb-4 text-sm">Support</h3>
+            <ul className="space-y-2 text-xs text-white/80">
+              <li><Link href="/contact" className="hover:text-white hover:underline transition-all">Contact Us</Link></li>
+              <li><Link href="/faq" className="hover:text-white hover:underline transition-all">FAQ</Link></li>
+              <li><Link href="/terms" className="hover:text-white hover:underline transition-all">Terms & Conditions</Link></li>
+              <li><Link href="/privacy" className="hover:text-white hover:underline transition-all">Privacy Policy</Link></li>
             </ul>
           </div>
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Connect With Us</h3>
-            <div className="flex space-x-4">
-              <a href="#" className="hover:text-primary transition-colors"><Globe className="h-5 w-5" /></a>
-              <a href="#" className="hover:text-primary transition-colors"><Mail className="h-5 w-5" /></a>
-              <a href="#" className="hover:text-primary transition-colors"><MessageCircle className="h-5 w-5" /></a>
-              <a href="#" className="hover:text-primary transition-colors"><Phone className="h-5 w-5" /></a>
+            <h3 className="text-white font-bold mb-4 text-sm">Connect With Us</h3>
+            <div className="flex space-x-3 mb-4">
+              <a href="#" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Globe className="h-5 w-5" /></a>
+              <a href="#" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Mail className="h-5 w-5" /></a>
+              <a href="#" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Phone className="h-5 w-5" /></a>
             </div>
-            <p className="text-sm mt-4">
+            <p className="text-xs text-white/80">
               Email: support@resellhub.com<br />
               Phone: +880 1234 567890
             </p>
           </div>
         </div>
-        <div className="border-t border-border mt-12 pt-8 text-sm text-center">
+        <div className="border-t border-white/20 mt-10 pt-6 text-xs text-center text-white/60">
           <p>&copy; {new Date().getFullYear()} ReSell Hub. All rights reserved.</p>
         </div>
       </div>

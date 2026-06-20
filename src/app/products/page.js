@@ -145,46 +145,34 @@ export default function ProductsPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {currentProducts.map((product, index) => (
-                <motion.div
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 items-stretch">
+              {currentProducts.map((product) => (
+                <Link
                   key={product.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-card rounded-2xl overflow-hidden border shadow-sm hover:shadow-xl transition-shadow group flex flex-col"
+                  href={`/products/${product.id}`}
+                  className="bg-card border rounded hover:shadow-md transition-shadow flex flex-col group h-full"
                 >
-                  <div className="relative aspect-4/3 overflow-hidden">
+                  <div className="relative aspect-4/3 bg-muted border-b w-full overflow-hidden shrink-0">
                     <img
                       src={product.images[0]}
                       alt={product.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <div className="absolute top-2 right-2 bg-background/80 backdrop-blur px-2 py-1 rounded-md text-xs font-semibold">
-                      {product.condition}
-                    </div>
                   </div>
-                  <div className="p-5 flex flex-col grow">
-                    <div className="text-xs text-primary font-medium mb-1">
-                      {product.category}
-                    </div>
-                    <h3
-                      className="font-semibold text-lg line-clamp-1 mb-2"
-                      title={product.title}
-                    >
+                  <div className="p-2 md:p-3 flex flex-col grow">
+                    <h3 className="font-normal text-sm text-foreground line-clamp-2 mb-1 group-hover:text-primary">
                       {product.title}
                     </h3>
-                    <div className="text-xl font-bold text-foreground mt-auto mb-4">
-                      ৳{product.price.toLocaleString()}
+                    <div className="text-primary font-bold text-sm md:text-base mb-2 mt-auto">
+                      ৳ {product.price.toLocaleString()}
                     </div>
-                    <Link
-                      href={`/products/${product.id}`}
-                      className="block w-full text-center px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-lg hover:bg-muted transition-colors"
-                    >
-                      View Details
-                    </Link>
+
+                    <div className="flex justify-between items-center text-[10px] md:text-[11px] text-muted-foreground pt-2 border-t">
+                      <div className="flex items-center">Dhaka</div>
+                      <div className="flex items-center">Just now</div>
+                    </div>
                   </div>
-                </motion.div>
+                </Link>
               ))}
             </div>
           )}
