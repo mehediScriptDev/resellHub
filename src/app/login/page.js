@@ -1,9 +1,42 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Mail, Lock, LogIn } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const { data, error } = await authClient.signIn.email({
+      email,
+      password,
+    });
+    setLoading(false);
+    
+    if (error) {
+      alert(error.message || "Failed to login");
+    } else {
+      const role = data?.user?.role || "buyer";
+      router.push(`/dashboard/${role}`);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const { data, error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard/buyer",
+    });
+    if (error) alert(error.message);
+  };
+
   return (
     <div className="grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/30">
       <div className="max-w-md w-full bg-card rounded-2xl shadow-sm border p-8 space-y-8">
@@ -21,7 +54,7 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <label htmlFor="email-address" className="sr-only">
@@ -35,6 +68,8 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none rounded-lg relative block w-full pl-10 px-3 py-3 border border-border bg-background placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Email address"
                 />
@@ -52,6 +87,8 @@ export default function LoginPage() {
                   type="password"
                   autoComplete="current-password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none rounded-lg relative block w-full pl-10 px-3 py-3 border border-border bg-background placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Password"
                 />
@@ -87,13 +124,14 @@ export default function LoginPage() {
 
           <div>
             <button
-              type="button"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <LogIn className="h-5 w-5 text-primary-foreground/50 group-hover:text-primary-foreground/80" />
               </span>
-              Sign in
+              {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
 
@@ -112,6 +150,7 @@ export default function LoginPage() {
             <div className="mt-6 grid grid-cols-1 gap-3">
               <button
                 type="button"
+                onClick={handleGoogleLogin}
                 className="w-full inline-flex justify-center py-2 px-4 border border-border rounded-lg shadow-sm bg-background text-sm font-medium text-foreground hover:bg-muted"
               >
                 <span className="sr-only">Sign in with Google</span>

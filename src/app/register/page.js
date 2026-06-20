@@ -1,9 +1,45 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Mail, Lock, UserPlus, User } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("buyer");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const { data, error } = await authClient.signUp.email({
+      email,
+      password,
+      name: username,
+      role
+    });
+    
+    setLoading(false);
+    if (error) {
+      alert(error.message || "Registration failed");
+    } else {
+      router.push(`/dashboard/${role}`);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const { data, error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: `/dashboard/${role}`,
+    });
+    if (error) alert(error.message);
+  };
+
   return (
     <div className="grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/30">
       <div className="max-w-md w-full bg-card rounded-2xl shadow-sm border p-8 space-y-8">
@@ -21,7 +57,7 @@ export default function RegisterPage() {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" onSubmit={handleRegister}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <label htmlFor="username" className="sr-only">
@@ -34,6 +70,8 @@ export default function RegisterPage() {
                   name="username"
                   type="text"
                   required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="appearance-none rounded-lg relative block w-full pl-10 px-3 py-3 border border-border bg-background placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Username"
                 />
@@ -51,6 +89,8 @@ export default function RegisterPage() {
                   type="email"
                   autoComplete="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none rounded-lg relative block w-full pl-10 px-3 py-3 border border-border bg-background placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Email address"
                 />
@@ -68,6 +108,8 @@ export default function RegisterPage() {
                   type="password"
                   autoComplete="new-password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none rounded-lg relative block w-full pl-10 px-3 py-3 border border-border bg-background placeholder-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Password"
                 />
@@ -84,8 +126,9 @@ export default function RegisterPage() {
                     type="radio"
                     name="role"
                     value="buyer"
+                    checked={role === "buyer"}
+                    onChange={() => setRole("buyer")}
                     className="mr-2"
-                    defaultChecked
                   />
                   Buy items
                 </label>
@@ -94,6 +137,8 @@ export default function RegisterPage() {
                     type="radio"
                     name="role"
                     value="seller"
+                    checked={role === "seller"}
+                    onChange={() => setRole("seller")}
                     className="mr-2"
                   />
                   Sell items
@@ -104,13 +149,14 @@ export default function RegisterPage() {
 
           <div>
             <button
-              type="button"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
+              type="submit"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:opacity-50"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <UserPlus className="h-5 w-5 text-primary-foreground/50 group-hover:text-primary-foreground/80" />
               </span>
-              Register
+              {loading ? "Registering..." : "Register"}
             </button>
           </div>
 
@@ -129,6 +175,7 @@ export default function RegisterPage() {
             <div className="mt-6 grid grid-cols-1 gap-3">
               <button
                 type="button"
+                onClick={handleGoogleLogin}
                 className="w-full inline-flex justify-center py-2 px-4 border border-border rounded-lg shadow-sm bg-background text-sm font-medium text-foreground hover:bg-muted"
               >
                 <span className="sr-only">Sign in with Google</span>
