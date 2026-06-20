@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, Lock, UserPlus, User } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
@@ -12,32 +12,22 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("buyer");
   const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
   const router = useRouter();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { data, error } = await authClient.signUp.email({
-      email,
-      password,
-      name: username,
-      role
-    });
+    const result = await register(username, email, password, role);
     
     setLoading(false);
-    if (error) {
-      alert(error.message || "Registration failed");
-    } else {
-      router.push(`/dashboard/${role}`);
+    if (!result.success) {
+      alert(result.message || "Registration failed");
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const { data, error } = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: `/dashboard/${role}`,
-    });
-    if (error) alert(error.message);
+  const handleGoogleLogin = () => {
+    alert("Google login requires backend OAuth integration. Please use email/password for now.");
   };
 
   return (

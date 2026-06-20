@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MOCK_PRODUCTS, CATEGORIES } from "@/lib/mockData";
-import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { CATEGORIES } from "@/lib/mockData";
+import { Search, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import api from "@/lib/api";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -14,40 +15,44 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredProducts = useMemo(() => {
-    let result = MOCK_PRODUCTS;
+  const [products, setProducts] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-    // Search filter
-    if (searchQuery) {
-      result = result.filter((p) =>
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const { data } = await api.get('/products', {
+          params: {
+            search: searchQuery,
+            category,
+            sort: sortBy,
+            page: currentPage,
+            limit: ITEMS_PER_PAGE
+          }
+        });
+        if (data.success) {
+          setProducts(data.data);
+          setTotalPages(data.totalPages);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Category filter
-    if (category !== "All") {
-      result = result.filter((p) => p.category === category);
-    }
+    // Debounce search slightly
+    const timer = setTimeout(() => {
+      fetchProducts();
+    }, 300);
 
-    // Sort
-    if (sortBy === "price-low") {
-      result = [...result].sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price-high") {
-      result = [...result].sort((a, b) => b.price - a.price);
-    }
-
-    return result;
-  }, [searchQuery, category, sortBy]);
-
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-
-  const currentProducts = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+    return () => clearTimeout(timer);
+  }, [searchQuery, category, sortBy, currentPage]);
 
   // Reset page when filters change
-  useMemo(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, category, sortBy]);
 
@@ -125,7 +130,11 @@ export default function ProductsPage() {
 
         {/* Product Grid */}
         <div className="lg:col-span-3">
-          {currentProducts.length === 0 ? (
+          {loading ? (
+            <div className="flex justify-center items-center py-20 text-muted-foreground">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          ) : products.length === 0 ? (
             <div className="text-center py-20 bg-card rounded-2xl border border-dashed">
               <h3 className="text-xl font-medium text-foreground mb-2">
                 No products found
@@ -146,15 +155,15 @@ export default function ProductsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 items-stretch">
-              {currentProducts.map((product) => (
+              {products.map((product) => (
                 <Link
-                  key={product.id}
-                  href={`/products/${product.id}`}
+                  key={product._id}
+                  href={`/products/${product._id}`}
                   className="bg-card border rounded hover:shadow-md transition-shadow flex flex-col group h-full"
                 >
                   <div className="relative aspect-4/3 bg-muted border-b w-full overflow-hidden shrink-0">
                     <img
-                      src={product.images[0]}
+                      src={product.images && product.images.length > 0 ? product.images[0] : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80'}
                       alt={product.title}
                       className="absolute inset-0 w-full h-full object-cover"
                     />
@@ -168,8 +177,8 @@ export default function ProductsPage() {
                     </div>
 
                     <div className="flex justify-between items-center text-[10px] md:text-[11px] text-muted-foreground pt-2 border-t">
-                      <div className="flex items-center">Dhaka</div>
-                      <div className="flex items-center">Just now</div>
+                      <div className="flex items-center">{product.sellerId?.name || "Seller"}</div>
+                      <div className="flex items-center">{product.condition}</div>
                     </div>
                   </div>
                 </Link>

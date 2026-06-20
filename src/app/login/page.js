@@ -3,38 +3,29 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, Lock, LogIn } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { data, error } = await authClient.signIn.email({
-      email,
-      password,
-    });
+    const result = await login(email, password);
     setLoading(false);
     
-    if (error) {
-      alert(error.message || "Failed to login");
-    } else {
-      const role = data?.user?.role || "buyer";
-      router.push(`/dashboard/${role}`);
+    if (!result.success) {
+      alert(result.message || "Failed to login");
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const { data, error } = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard/buyer",
-    });
-    if (error) alert(error.message);
+  const handleGoogleLogin = () => {
+    alert("Google login requires backend OAuth integration. Please use email/password for now.");
   };
 
   return (

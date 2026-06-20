@@ -3,20 +3,40 @@
 import { useState } from "react";
 import { UploadCloud, CheckCircle2, MapPin } from "lucide-react";
 import { CATEGORIES } from "@/lib/mockData";
+import api from "@/lib/api";
 
 export default function AddProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({
+    category: "",
+    condition: "Used",
+    title: "",
+    description: "",
+    price: "",
+  });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
+    setError(null);
+    try {
+      const { data } = await api.post("/products", {
+        ...formData,
+        price: Number(formData.price),
+        images: ["https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500&q=60"], // Mock image
+      });
+      if (data.success) {
+        setSuccess(true);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to post ad.");
+    } finally {
       setIsSubmitting(false);
-      setSuccess(true);
-    }, 1500);
+    }
   };
+
 
   if (success) {
     return (
@@ -41,6 +61,7 @@ export default function AddProductPage() {
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6">
       <h1 className="text-2xl font-bold text-foreground mb-6 border-b pb-4">Post an Ad</h1>
+      {error && <div className="p-4 bg-red-100 text-red-700 rounded mb-6">{error}</div>}
       
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Category & Details */}
@@ -50,7 +71,7 @@ export default function AddProductPage() {
           <div className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Category <span className="text-red-500">*</span></label>
-              <select required className="w-full px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background">
+              <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background">
                 <option value="">Select a category</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -60,11 +81,11 @@ export default function AddProductPage() {
               <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Condition <span className="text-red-500">*</span></label>
               <div className="flex gap-6">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="condition" value="Used" required className="accent-primary w-4 h-4" />
+                  <input type="radio" name="condition" value="Used" checked={formData.condition === "Used"} onChange={e => setFormData({...formData, condition: e.target.value})} className="accent-primary w-4 h-4" />
                   <span className="text-sm font-medium text-foreground">Used</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="condition" value="New" required className="accent-primary w-4 h-4" />
+                  <input type="radio" name="condition" value="New" checked={formData.condition === "New"} onChange={e => setFormData({...formData, condition: e.target.value})} className="accent-primary w-4 h-4" />
                   <span className="text-sm font-medium text-foreground">New</span>
                 </label>
               </div>
@@ -72,13 +93,13 @@ export default function AddProductPage() {
 
             <div>
               <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Title <span className="text-red-500">*</span></label>
-              <input required type="text" maxLength={70} className="w-full px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background" placeholder="Keep it short and descriptive" />
+              <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} type="text" maxLength={70} className="w-full px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background" placeholder="Keep it short and descriptive" />
               <p className="text-[10px] text-muted-foreground mt-1 text-right">Max 70 characters</p>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Description <span className="text-red-500">*</span></label>
-              <textarea required rows={6} className="w-full px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background" placeholder="Describe your item in detail..."></textarea>
+              <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows={6} className="w-full px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background" placeholder="Describe your item in detail..."></textarea>
             </div>
           </div>
         </div>
@@ -100,7 +121,7 @@ export default function AddProductPage() {
           <div className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Price (৳) <span className="text-red-500">*</span></label>
-              <input required type="number" min="0" className="w-full md:w-1/2 px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background" placeholder="e.g. 5000" />
+              <input required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} type="number" min="0" className="w-full md:w-1/2 px-3 py-2 border rounded focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm bg-background" placeholder="e.g. 5000" />
               <label className="flex items-center gap-2 mt-3 cursor-pointer w-max">
                 <input type="checkbox" className="accent-primary w-4 h-4" />
                 <span className="text-xs text-foreground font-medium">Negotiable</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState, useEffect } from "react";
-import { MOCK_PRODUCTS } from "@/lib/mockData";
+import api from "@/lib/api";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,8 +17,25 @@ export default function ProductDetails({ params }) {
   const resolvedParams = use(params);
   const { id } = resolvedParams;
 
-  const product = MOCK_PRODUCTS.find((p) => p.id === id);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const { data } = await api.get(`/products/${id}`);
+        if (data.success) {
+          setProduct(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching product", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
 
   useEffect(() => {
     if (!product) return;
@@ -27,7 +44,7 @@ export default function ProductDetails({ params }) {
     let viewedList = stored ? JSON.parse(stored) : [];
 
     // Remove current product if it exists so we can move it to front
-    viewedList = viewedList.filter((p) => p.id !== product.id);
+    viewedList = viewedList.filter((p) => p._id !== product._id);
 
     // Add current product to front
     viewedList.unshift(product);
@@ -42,12 +59,21 @@ export default function ProductDetails({ params }) {
 
     // Set state to show OTHER recently viewed items
     setRecentlyViewed(
-      viewedList.filter((p) => p.id !== product.id).slice(0, 4),
+      viewedList.filter((p) => p._id !== product._id).slice(0, 4),
     );
   }, [product]);
 
+  if (loading) {
+    return <div className="py-20 text-center">Loading product details...</div>;
+  }
+
   if (!product) {
-    return notFound();
+    return (
+      <div className="py-20 text-center">
+        <h2 className="text-2xl font-bold">Product not found</h2>
+        <Link href="/products" className="text-primary hover:underline mt-4 inline-block">Back to products</Link>
+      </div>
+    );
   }
 
   return (
@@ -72,7 +98,7 @@ export default function ProductDetails({ params }) {
         <div className="space-y-4">
           <div className="aspect-4/3 rounded-2xl overflow-hidden border bg-muted">
             <img
-              src={product.images[0]}
+              src={product.images && product.images.length > 0 ? product.images[0] : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80'}
               alt={product.title}
               className="w-full h-full object-cover"
             />
@@ -80,7 +106,7 @@ export default function ProductDetails({ params }) {
           <div className="flex gap-4">
             <div className="w-20 h-20 rounded-lg border-2 border-primary overflow-hidden cursor-pointer">
               <img
-                src={product.images[0]}
+                src={product.images && product.images.length > 0 ? product.images[0] : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80'}
                 alt="thumbnail"
                 className="w-full h-full object-cover"
               />
@@ -118,12 +144,12 @@ export default function ProductDetails({ params }) {
                 Seller Information
               </h3>
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-xl">
-                  {product.sellerInfo.name.charAt(0)}
+                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold text-xl uppercase">
+                  {product.sellerId?.name?.charAt(0) || "S"}
                 </div>
                 <div>
                   <div className="font-medium text-foreground">
-                    {product.sellerInfo.name}
+                    {product.sellerId?.name || "Unknown Seller"}
                   </div>
                   <div className="flex items-center text-sm text-yellow-500">
                     <Star className="w-4 h-4 fill-yellow-500 mr-1" /> 4.8 (24
@@ -144,7 +170,7 @@ export default function ProductDetails({ params }) {
             {/* Actions */}
             <div className="flex gap-4">
               <Link
-                href="/checkout"
+                href={`/checkout?productId=${product._id}`}
                 className="flex-1 bg-primary text-primary-foreground text-center py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition shadow-lg hover:shadow-primary/25"
               >
                 Buy Now
@@ -166,13 +192,13 @@ export default function ProductDetails({ params }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {recentlyViewed.map((item) => (
               <Link
-                href={`/products/${item.id}`}
-                key={item.id}
+                href={`/products/${item._id}`}
+                key={item._id}
                 className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition block group"
               >
                 <div className="aspect-4/3 overflow-hidden">
                   <img
-                    src={item.images[0]}
+                    src={item.images && item.images.length > 0 ? item.images[0] : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80'}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
