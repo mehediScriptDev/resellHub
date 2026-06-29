@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
 
-export function CheckoutForm({ clientSecret, productId }) {
+export function CheckoutForm({ clientSecret, product, deliveryInfo, totalAmount }) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState(null);
@@ -26,7 +26,7 @@ export function CheckoutForm({ clientSecret, productId }) {
       payment_method: {
         card: cardElement,
         billing_details: {
-          name: user?.name || "Anonymous",
+          name: deliveryInfo.fullName || user?.name || "Anonymous",
           email: user?.email || "",
         },
       },
@@ -35,17 +35,29 @@ export function CheckoutForm({ clientSecret, productId }) {
     if (paymentError) {
       setError(paymentError.message);
       setLoading(false);
-    } else if (paymentIntent.status === "succeeded") {
-      // Payment successful! Create order in DB.
+      return;
+    }
+
+    if (paymentIntent.status === "succeeded") {
       try {
-        await api.post("/orders", {
-          product: productId,
-          amount: paymentIntent.amount / 100, // convert cents back to BDT
+        const { data: orderRes } = await api.post("/orders", {
+          productId: product._id,
+          deliveryInfo,
+          totalAmount,
         });
-        alert("Payment successful!");
-        router.push("/dashboard/buyer");
+
+        await api.post("/payments/save", {
+          orderId: orderRes.data._id,
+          transactionId: paymentIntent.id,
+          amount: totalAmount,
+          status: "success",
+        });
+
+        router.push(
+          `/payment-success?txn=${paymentIntent.id}&amount=${totalAmount}&order=${orderRes.data._id}`
+        );
       } catch (err) {
-        setError("Payment succeeded but order creation failed.");
+        setError(err.response?.data?.message || "Payment succeeded but order creation failed.");
         setLoading(false);
       }
     }
@@ -55,18 +67,24 @@ export function CheckoutForm({ clientSecret, productId }) {
     <form onSubmit={handleSubmit} className="bg-card border rounded-2xl p-6 shadow-sm">
       <h2 className="text-xl font-semibold mb-4 flex items-center">Payment Method (Stripe)</h2>
       <div className="p-4 border rounded-xl bg-muted/30 mb-4">
-        <CardElement options={{ style: { base: { fontSize: '16px', color: '#424770', '::placeholder': { color: '#aab7c4' } } } }} />
+        <CardElement
+          options={{
+            style: {
+              base: { fontSize: "16px", color: "#424770", "::placeholder": { color: "#aab7c4" } },
+            },
+          }}
+        />
       </div>
       {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         disabled={!stripe || loading}
         className="w-full flex justify-center py-3 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition shadow-lg disabled:opacity-50"
       >
         {loading ? "Processing..." : "Pay Now"}
       </button>
       <p className="text-sm text-muted-foreground flex items-center mt-4 justify-center">
-         <ShieldCheck className="w-4 h-4 mr-1 text-green-500" /> Payments are secure and encrypted.
+        <ShieldCheck className="w-4 h-4 mr-1 text-green-500" /> Payments are secure and encrypted.
       </p>
     </form>
   );

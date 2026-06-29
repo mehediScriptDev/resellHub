@@ -1,20 +1,35 @@
 "use client";
 
-import { BarChart3, TrendingUp, Users, Eye } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Eye, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
 
 export default function SellerAnalyticsPage() {
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get("/stats/seller").then(({ data }) => {
+      if (data.success) setAnalytics(data.data);
+    }).catch(console.error).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <div className="py-12 flex justify-center"><Loader2 className="w-6 h-6 animate-spin" /></div>;
+  }
+
   const stats = [
-    { title: "Total Revenue", value: "৳ 245,000", icon: TrendingUp, color: "text-green-500", bg: "bg-green-100" },
-    { title: "Profile Views", value: "12,450", icon: Eye, color: "text-blue-500", bg: "bg-blue-100" },
-    { title: "Unique Customers", value: "84", icon: Users, color: "text-purple-500", bg: "bg-purple-100" },
-    { title: "Conversion Rate", value: "3.2%", icon: BarChart3, color: "text-orange-500", bg: "bg-orange-100" },
+    { title: "Total Revenue", value: `৳ ${analytics?.totalRevenue?.toLocaleString() || 0}`, icon: TrendingUp, color: "text-green-500", bg: "bg-green-100" },
+    { title: "Profile Views", value: analytics?.totalViews?.toLocaleString() || "0", icon: Eye, color: "text-blue-500", bg: "bg-blue-100" },
+    { title: "Unique Customers", value: analytics?.uniqueCustomers || 0, icon: Users, color: "text-purple-500", bg: "bg-purple-100" },
+    { title: "Conversion Rate", value: `${analytics?.conversionRate || 0}%`, icon: BarChart3, color: "text-orange-500", bg: "bg-orange-100" },
   ];
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-        <p className="text-muted-foreground text-sm mt-1">Deep dive into your store's performance.</p>
+        <p className="text-muted-foreground text-sm mt-1">Deep dive into your store&apos;s performance.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -36,11 +51,22 @@ export default function SellerAnalyticsPage() {
         })}
       </div>
 
-      <div className="bg-card border rounded-lg shadow-sm p-6 h-96 flex flex-col items-center justify-center text-center">
-        <BarChart3 className="h-16 w-16 text-muted-foreground/30 mb-4" />
-        <h3 className="font-bold text-lg text-foreground">Detailed charts coming soon</h3>
-        <p className="text-sm text-muted-foreground max-w-sm mt-2">We are gathering enough data to generate your monthly revenue trends and traffic sources.</p>
-      </div>
+      {analytics?.monthlyRevenue?.length > 0 && (
+        <div className="bg-card border rounded-lg shadow-sm p-6">
+          <h3 className="font-bold text-lg mb-4">Monthly Revenue</h3>
+          <div className="space-y-3">
+            {analytics.monthlyRevenue.map((m) => (
+              <div key={m._id} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                <span className="font-medium">{m._id}</span>
+                <div className="text-right">
+                  <span className="font-bold text-primary">৳{m.revenue?.toLocaleString()}</span>
+                  <span className="text-xs text-muted-foreground ml-2">({m.orders} orders)</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

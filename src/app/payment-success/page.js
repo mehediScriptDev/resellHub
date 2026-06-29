@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { CheckCircle2, ArrowRight, Package } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function PaymentSuccessPage() {
+  const searchParams = useSearchParams();
+  const txn = searchParams.get("txn") || "N/A";
+  const amount = searchParams.get("amount") || "0";
+
   return (
     <div className="grow flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full bg-card rounded-2xl shadow-sm border p-8 text-center">
@@ -16,26 +23,24 @@ export default function PaymentSuccessPage() {
         <div className="bg-muted/30 border rounded-xl p-4 text-left mb-8">
           <div className="flex justify-between text-sm mb-2">
             <span className="text-muted-foreground">Transaction ID</span>
-            <span className="font-medium">TRX-987654321</span>
+            <span className="font-medium truncate max-w-[180px]">{txn}</span>
           </div>
           <div className="flex justify-between text-sm mb-2">
             <span className="text-muted-foreground">Amount Paid</span>
-            <span className="font-bold text-primary">৳35,170</span>
+            <span className="font-bold text-primary">৳{Number(amount).toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Date</span>
-            <span className="font-medium">
-              {new Date().toLocaleDateString()}
-            </span>
+            <span className="font-medium">{new Date().toLocaleDateString()}</span>
           </div>
         </div>
 
         <div className="space-y-3">
           <Link
-            href="/dashboard/buyer"
+            href="/dashboard/buyer/orders"
             className="w-full flex justify-center items-center py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition"
           >
-            <Package className="w-4 h-4 mr-2" /> View Dashboard
+            <Package className="w-4 h-4 mr-2" /> View My Orders
           </Link>
           <Link
             href="/products"

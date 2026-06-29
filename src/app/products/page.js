@@ -2,22 +2,29 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CATEGORIES } from "@/lib/mockData";
 import { Search, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
 
 const ITEMS_PER_PAGE = 6;
 
 export default function ProductsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [category, setCategory] = useState("All");
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "All");
   const [sortBy, setSortBy] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
+  const [categories, setCategories] = useState([]);
 
   const [products, setProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get("/stats/categories").then(({ data }) => {
+      if (data.success) setCategories(data.data.map((c) => c.name));
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -102,7 +109,7 @@ export default function ProductsPage() {
                   onChange={(e) => setCategory(e.target.value)}
                 >
                   <option value="All">All Categories</option>
-                  {CATEGORIES.map((c) => (
+                  {categories.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>

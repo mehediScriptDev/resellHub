@@ -2,8 +2,18 @@
 
 import { Leaf, Recycle, TreePine } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
 
 export function SustainabilityImpact() {
+  const [rescued, setRescued] = useState(0);
+
+  useEffect(() => {
+    api.get("/stats/public").then(({ data }) => {
+      if (data.success) setRescued(data.data.completedOrders);
+    }).catch(console.error);
+  }, []);
+
   return (
     <section className="py-20 bg-green-50 dark:bg-green-950/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,7 +71,7 @@ export function SustainabilityImpact() {
                 <Leaf className="w-8 h-8" />
               </div>
               <div>
-                <p className="text-3xl font-extrabold text-foreground">12,000+</p>
+                <p className="text-3xl font-extrabold text-foreground">{rescued.toLocaleString()}+</p>
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Items Rescued</p>
               </div>
             </div>

@@ -5,13 +5,12 @@ import api from "@/lib/api";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ShoppingCart,
+  Heart,
   Star,
-  MapPin,
   Phone,
-  MessageCircle,
   ChevronRight,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ProductDetails({ params }) {
   const resolvedParams = use(params);
@@ -20,6 +19,8 @@ export default function ProductDetails({ params }) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [wishlistAdded, setWishlistAdded] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -27,6 +28,7 @@ export default function ProductDetails({ params }) {
         const { data } = await api.get(`/products/${id}`);
         if (data.success) {
           setProduct(data.data);
+          api.post(`/products/${id}/view`).catch(() => {});
         }
       } catch (error) {
         console.error("Error fetching product", error);
@@ -36,6 +38,19 @@ export default function ProductDetails({ params }) {
     };
     fetchProduct();
   }, [id]);
+
+  const addToWishlist = async () => {
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+    try {
+      await api.post("/wishlist", { productId: id });
+      setWishlistAdded(true);
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to add to wishlist");
+    }
+  };
 
   useEffect(() => {
     if (!product) return;
@@ -152,18 +167,20 @@ export default function ProductDetails({ params }) {
                     {product.sellerId?.name || "Unknown Seller"}
                   </div>
                   <div className="flex items-center text-sm text-yellow-500">
-                    <Star className="w-4 h-4 fill-yellow-500 mr-1" /> 4.8 (24
-                    reviews)
+                    <Star className="w-4 h-4 fill-yellow-500 mr-1" />
+                    {product.views || 0} views
                   </div>
                 </div>
               </div>
               <div className="flex gap-3">
-                <button className="flex-1 bg-secondary text-foreground hover:bg-muted py-2 rounded-lg text-sm font-medium transition flex items-center justify-center">
-                  <MessageCircle className="w-4 h-4 mr-2" /> Chat
-                </button>
-                <button className="flex-1 bg-secondary text-foreground hover:bg-muted py-2 rounded-lg text-sm font-medium transition flex items-center justify-center">
-                  <Phone className="w-4 h-4 mr-2" /> Call
-                </button>
+                {product.sellerId?.phone && (
+                  <a
+                    href={`tel:${product.sellerId.phone}`}
+                    className="flex-1 bg-secondary text-foreground hover:bg-muted py-2 rounded-lg text-sm font-medium transition flex items-center justify-center"
+                  >
+                    <Phone className="w-4 h-4 mr-2" /> Call Seller
+                  </a>
+                )}
               </div>
             </div>
 
@@ -175,8 +192,12 @@ export default function ProductDetails({ params }) {
               >
                 Buy Now
               </Link>
-              <button className="px-6 border border-border text-foreground hover:bg-muted py-4 rounded-xl font-semibold transition">
-                <ShoppingCart className="w-6 h-6" />
+              <button
+                onClick={addToWishlist}
+                disabled={wishlistAdded}
+                className="px-6 border border-border text-foreground hover:bg-muted py-4 rounded-xl font-semibold transition disabled:opacity-50"
+              >
+                <Heart className={`w-6 h-6 ${wishlistAdded ? "fill-red-500 text-red-500" : ""}`} />
               </button>
             </div>
           </div>
