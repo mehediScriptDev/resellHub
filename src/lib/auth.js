@@ -2,9 +2,10 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { jwt } from "better-auth/plugins";
 import { db, mongoClient } from "./db";
+import { getAppUrl } from "./app-url";
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: getAppUrl(),
   secret: process.env.BETTER_AUTH_SECRET,
   database: mongodbAdapter(db, { client: mongoClient }),
   emailAndPassword: {
