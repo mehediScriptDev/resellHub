@@ -2,11 +2,18 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { jwt } from "better-auth/plugins";
 import { db, mongoClient } from "./db";
-import { getAppUrl } from "./app-url";
+import { getAppUrl, getGoogleRedirectUri } from "./app-url";
+
+const appUrl = getAppUrl();
 
 export const auth = betterAuth({
-  baseURL: getAppUrl(),
+  baseURL: appUrl,
   secret: process.env.BETTER_AUTH_SECRET,
+  trustedOrigins: [
+    appUrl,
+    "http://localhost:3000",
+    "https://resell-hub-chi.vercel.app",
+  ],
   database: mongodbAdapter(db, { client: mongoClient }),
   emailAndPassword: {
     enabled: true,
@@ -15,6 +22,7 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      redirectURI: getGoogleRedirectUri(),
     },
   },
   user: {

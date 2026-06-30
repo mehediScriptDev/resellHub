@@ -8,10 +8,8 @@
 
 | App | URL |
 |-----|-----|
-| **Frontend (Vercel)** | `https://your-app-name.vercel.app` |
-| **Backend API** | `https://your-api-name.onrender.com` |
-
-> Update these URLs after deployment and before submission.
+| **Frontend** | https://resell-hub-chi.vercel.app |
+| **Backend API** | https://resell-api.vercel.app |
 
 ---
 
@@ -142,12 +140,12 @@ Create `.env.local` in the project root:
 
 | Variable | Example | Required | Description |
 |----------|---------|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:5000/api` | Yes | Express backend API base URL |
+| `NEXT_PUBLIC_API_URL` | `https://resell-api.vercel.app/api` | Yes | Backend API base URL |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_test_...` | Yes | Stripe publishable key |
 | `GOOGLE_CLIENT_ID` | `xxx.apps.googleusercontent.com` | Yes | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | `GOCSPX-...` | Yes | Google OAuth client secret |
 | `BETTER_AUTH_SECRET` | random 32+ char string | Yes | Better Auth session secret |
-| `BETTER_AUTH_URL` | `http://localhost:3000` | Yes | This app's public URL |
+| `BETTER_AUTH_URL` | `https://resell-hub-chi.vercel.app` | Yes | Frontend public URL (OAuth) |
 | `Database` | `mongodb+srv://<db_username>:<db_password>@...` | Yes | MongoDB URI for Better Auth |
 | `Databaseuser` | `b10` | Yes | MongoDB username (replaces placeholder) |
 | `DatabasePass` | `yourpassword` | Yes | MongoDB password (replaces placeholder) |
@@ -173,14 +171,12 @@ In [Google Cloud Console](https://console.cloud.google.com/) → Credentials →
 
 **Authorized JavaScript origins:**
 ```
-http://localhost:3000
-https://your-app-name.vercel.app
+https://resell-hub-chi.vercel.app
 ```
 
 **Authorized redirect URIs:**
 ```
-http://localhost:3000/api/auth/callback/google
-https://your-app-name.vercel.app/api/auth/callback/google
+https://resell-hub-chi.vercel.app/api/auth/callback/google
 ```
 
 ---
@@ -217,15 +213,9 @@ In Vercel → Project → **Settings → Environment Variables**, add every vari
 
 | Variable | Production Value |
 |----------|-----------------|
-| `NEXT_PUBLIC_API_URL` | `https://your-api-name.onrender.com/api` |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Your Stripe `pk_test_...` key |
-| `GOOGLE_CLIENT_ID` | Same as local |
-| `GOOGLE_CLIENT_SECRET` | Same as local |
-| `BETTER_AUTH_SECRET` | Same random secret as local |
-| `BETTER_AUTH_URL` | `https://your-app-name.vercel.app` |
-| `Database` | Your MongoDB Atlas URI with placeholders |
-| `Databaseuser` | MongoDB username |
-| `DatabasePass` | MongoDB password |
+| `NEXT_PUBLIC_API_URL` | `https://resell-api.vercel.app/api` |
+| `NEXT_PUBLIC_APP_URL` | `https://resell-hub-chi.vercel.app` |
+| `BETTER_AUTH_URL` | `https://resell-hub-chi.vercel.app` |
 
 ### Step 4 — Deploy
 
