@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, Filter, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { ProductGridSkeleton } from "@/components/ProductCardSkeleton";
 import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
 
@@ -138,9 +139,7 @@ export default function ProductsPage() {
         {/* Product Grid */}
         <div className="lg:col-span-3">
           {loading ? (
-            <div className="flex justify-center items-center py-20 text-muted-foreground">
-              <Loader2 className="w-8 h-8 animate-spin" />
-            </div>
+            <ProductGridSkeleton count={ITEMS_PER_PAGE} />
           ) : products.length === 0 ? (
             <div className="text-center py-20 bg-card rounded-2xl border border-dashed">
               <h3 className="text-xl font-medium text-foreground mb-2">

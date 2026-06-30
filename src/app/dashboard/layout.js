@@ -27,7 +27,12 @@ export default function DashboardLayout({ children }) {
     if (!loading && user) {
       if (pathname.includes("/admin") && user.role !== "admin") {
         router.replace(`/dashboard/${user.role}`);
-      } else if (pathname.includes("/seller") && user.role !== "seller" && user.role !== "admin") {
+      } else if (
+        pathname.includes("/seller") &&
+        user.role !== "seller" &&
+        user.role !== "admin" &&
+        !pathname.includes("/dashboard/seller/add-product")
+      ) {
         router.replace(`/dashboard/${user.role}`);
       } else if (pathname.includes("/buyer") && user.role === "seller") {
         // sellers can still view buyer dashboard if needed - skip

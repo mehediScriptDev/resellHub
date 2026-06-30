@@ -20,6 +20,8 @@ export function Footer() {
             <ul className="space-y-2 text-xs text-white/80">
               <li><Link href="/" className="hover:text-white hover:underline transition-all">Home</Link></li>
               <li><Link href="/products" className="hover:text-white hover:underline transition-all">All Ads</Link></li>
+              <li><Link href="/about" className="hover:text-white hover:underline transition-all">About Us</Link></li>
+              <li><Link href="/categories" className="hover:text-white hover:underline transition-all">Categories</Link></li>
               <li><Link href="/dashboard/seller/add-product" className="hover:text-white hover:underline transition-all">Post an Ad</Link></li>
             </ul>
           </div>
@@ -35,9 +37,9 @@ export function Footer() {
           <div>
             <h3 className="text-white font-bold mb-4 text-sm">Connect With Us</h3>
             <div className="flex space-x-3 mb-4">
-              <a href="#" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Globe className="h-5 w-5" /></a>
-              <a href="#" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Mail className="h-5 w-5" /></a>
-              <a href="#" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Phone className="h-5 w-5" /></a>
+              <a href="https://resellhub.com" target="_blank" rel="noopener noreferrer" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Globe className="h-5 w-5" /></a>
+              <a href="mailto:support@resellhub.com" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Mail className="h-5 w-5" /></a>
+              <a href="tel:+8801234567890" className="text-white/80 hover:text-white hover:scale-110 transition-all"><Phone className="h-5 w-5" /></a>
             </div>
             <p className="text-xs text-white/80">
               Email: support@resellhub.com<br />

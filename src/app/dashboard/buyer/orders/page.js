@@ -1,6 +1,6 @@
 "use client";
 
-import { Package, Search, ChevronRight, Loader2 } from "lucide-react";
+import { Package, Search, Loader2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 
@@ -23,6 +23,22 @@ export default function BuyerOrdersPage() {
     const timer = setTimeout(fetchOrders, 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  const cancelOrder = async (orderId) => {
+    if (!confirm("Cancel this order?")) return;
+    try {
+      const { data } = await api.put(`/orders/${orderId}/cancel`);
+      if (data.success) {
+        setOrders((prev) =>
+          prev.map((o) => (o._id === orderId ? { ...o, orderStatus: "cancelled" } : o))
+        );
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to cancel order");
+    }
+  };
+
+  const canCancel = (status) => ["pending", "accepted"].includes(status);
 
   return (
     <div className="space-y-6">
@@ -72,16 +88,25 @@ export default function BuyerOrdersPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className="font-bold text-foreground">৳{order.totalAmount?.toLocaleString()}</p>
                     <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold capitalize ${
-                      order.orderStatus === "delivered" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+                      order.orderStatus === "delivered" ? "bg-green-100 text-green-700"
+                      : order.orderStatus === "cancelled" ? "bg-red-100 text-red-700"
+                      : "bg-blue-100 text-blue-700"
                     }`}>
                       {order.orderStatus}
                     </span>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  {canCancel(order.orderStatus) && (
+                    <button
+                      onClick={() => cancelOrder(order._id)}
+                      className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-medium px-3 py-1.5 border border-red-200 rounded-md hover:bg-red-50 transition-colors"
+                    >
+                      <XCircle className="w-4 h-4" /> Cancel
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

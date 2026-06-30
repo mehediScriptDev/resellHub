@@ -1,6 +1,6 @@
 "use client";
 
-import { Package, Plus, Search, Trash2, Loader2 } from "lucide-react";
+import { Package, Plus, Search, Trash2, Loader2, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
@@ -83,6 +83,7 @@ export default function SellerProductsPage() {
                   <th className="px-6 py-4">Product Name</th>
                   <th className="px-6 py-4">Price</th>
                   <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Stock</th>
                   <th className="px-6 py-4">Views</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
@@ -99,8 +100,15 @@ export default function SellerProductsPage() {
                         {STATUS_LABELS[product.status] || product.status}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-muted-foreground">{product.stock ?? 1}</td>
                     <td className="px-6 py-4 text-muted-foreground">{product.views || 0}</td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right flex justify-end gap-1">
+                      <Link
+                        href={`/dashboard/seller/products/${product._id}/edit`}
+                        className="p-1.5 text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
                       <button
                         onClick={() => deleteProduct(product._id)}
                         className="p-1.5 text-muted-foreground hover:text-red-500 transition-colors"

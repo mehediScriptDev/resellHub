@@ -1,31 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Mail, Lock, LogIn } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signInWithGoogle } from "@/lib/auth-client";
 
-export default function LoginPage() {
+const ERROR_MESSAGES = {
+  blocked: "Your account has been blocked.",
+  google_auth_failed: "Google sign-in failed. Please try again.",
+  google_auth_cancelled: "Google sign-in was cancelled.",
+  missing_token: "Sign-in could not be completed. Please try again.",
+  profile_failed: "Signed in but could not load your profile. Please try again.",
+};
+
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
   const { login } = useAuth();
-  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      setAuthError(ERROR_MESSAGES[error] || "Sign-in failed. Please try again.");
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setAuthError("");
     setLoading(true);
     const result = await login(email, password);
     setLoading(false);
-    
+
     if (!result.success) {
-      alert(result.message || "Failed to login");
+      setAuthError(result.message || "Failed to login");
     }
   };
 
-  const handleGoogleLogin = () => {
-    alert("Google login requires backend OAuth integration. Please use email/password for now.");
+  const handleGoogleLogin = async () => {
+    setAuthError("");
+    try {
+      await signInWithGoogle("buyer");
+    } catch {
+      setAuthError("Google sign-in failed. Please try again.");
+    }
   };
 
   return (
@@ -45,6 +68,11 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+        {authError && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {authError}
+          </div>
+        )}
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
@@ -176,5 +204,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="grow flex items-center justify-center py-12">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

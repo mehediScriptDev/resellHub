@@ -1,10 +1,12 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { jwt } from "better-auth/plugins";
-import { db } from "./db";
+import { db, mongoClient } from "./db";
 
 export const auth = betterAuth({
-  database: mongodbAdapter(db),
+  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  secret: process.env.BETTER_AUTH_SECRET,
+  database: mongodbAdapter(db, { client: mongoClient }),
   emailAndPassword: {
     enabled: true,
   },
@@ -12,22 +14,22 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }
+    },
   },
   user: {
     additionalFields: {
       role: {
         type: "string",
         required: false,
-        defaultValue: "buyer"
-      }
-    }
+        defaultValue: "buyer",
+      },
+    },
   },
   plugins: [
     jwt({
       jwt: {
-        secret: process.env.BETTER_AUTH_SECRET
-      }
-    })
-  ]
+        secret: process.env.BETTER_AUTH_SECRET,
+      },
+    }),
+  ],
 });

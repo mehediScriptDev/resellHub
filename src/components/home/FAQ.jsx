@@ -26,12 +26,12 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section className="py-8 bg-white border-t mt-4">
+    <section className="py-8 bg-muted/10 border-t mt-4">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-lg font-bold text-foreground mb-6 text-center">Frequently Asked Questions</h2>
         <div className="space-y-3">
           {FAQS.map((faq, index) => (
-            <div key={index} className="border rounded-md overflow-hidden">
+            <div key={index} className="border rounded-md overflow-hidden bg-card">
               <button 
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className="w-full flex justify-between items-center p-4 bg-muted/10 hover:bg-muted/30 transition-colors text-left font-medium text-foreground text-sm"
@@ -40,7 +40,7 @@ export function FAQ() {
                 {openIndex === index ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
               </button>
               {openIndex === index && (
-                <div className="p-4 bg-white text-sm text-muted-foreground border-t">
+                <div className="p-4 bg-muted/5 text-sm text-muted-foreground border-t">
                   {faq.answer}
                 </div>
               )}

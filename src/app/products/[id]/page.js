@@ -11,6 +11,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { ProductReviews } from "@/components/ProductReviews";
 
 export default function ProductDetails({ params }) {
   const resolvedParams = use(params);
@@ -143,9 +144,14 @@ export default function ProductDetails({ params }) {
             <h1 className="text-3xl font-bold text-foreground mb-4">
               {product.title}
             </h1>
-            <div className="text-4xl font-extrabold text-primary mb-6">
+            <div className="text-4xl font-extrabold text-primary mb-2">
               ৳{product.price.toLocaleString()}
             </div>
+            {(product.stock ?? 1) > 0 ? (
+              <p className="text-sm text-green-600 font-medium mb-6">{product.stock} in stock</p>
+            ) : (
+              <p className="text-sm text-red-600 font-medium mb-6">Out of stock</p>
+            )}
 
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
               {product.description}
@@ -203,6 +209,8 @@ export default function ProductDetails({ params }) {
           </div>
         </div>
       </div>
+
+      <ProductReviews productId={product._id} />
 
       {/* Optional Feature: Recently Viewed */}
       {recentlyViewed.length > 0 && (

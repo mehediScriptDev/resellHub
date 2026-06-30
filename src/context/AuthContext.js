@@ -100,8 +100,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const becomeSeller = async () => {
+    try {
+      const { data } = await api.post("/users/me/become-seller");
+      if (data.success) {
+        setUser(data.data);
+        localStorage.setItem("user", JSON.stringify(data.data));
+        return { success: true };
+      }
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || "Could not switch to seller" };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile, refreshProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile, refreshProfile, becomeSeller }}>
       {children}
     </AuthContext.Provider>
   );

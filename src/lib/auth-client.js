@@ -2,7 +2,15 @@ import { createAuthClient } from "better-auth/react";
 import { jwtClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
-  plugins: [
-    jwtClient()
-  ]
+  baseURL:
+    typeof window !== "undefined"
+      ? window.location.origin
+      : process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  plugins: [jwtClient()],
 });
+
+export const signInWithGoogle = (role = "buyer") =>
+  authClient.signIn.social({
+    provider: "google",
+    callbackURL: `/auth/callback?role=${encodeURIComponent(role)}`,
+  });

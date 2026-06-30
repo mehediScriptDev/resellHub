@@ -51,6 +51,7 @@ export function CheckoutForm({ clientSecret, product, deliveryInfo, totalAmount 
           transactionId: paymentIntent.id,
           amount: totalAmount,
           status: "success",
+          paymentMethod: "card",
         });
 
         router.push(

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
+import { ProductGridSkeleton } from "@/components/ProductCardSkeleton";
 
 export function FeaturedProducts() {
   const [featured, setFeatured] = useState([]);
@@ -45,9 +46,7 @@ export function FeaturedProducts() {
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-muted-foreground">
-            Loading products...
-          </div>
+          <ProductGridSkeleton count={5} />
         ) : (
           <motion.div
             variants={containerVariants}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Mail, Lock, UserPlus, User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { signInWithGoogle } from "@/lib/auth-client";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -13,7 +13,6 @@ export default function RegisterPage() {
   const [role, setRole] = useState("buyer");
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
-  const router = useRouter();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -26,8 +25,12 @@ export default function RegisterPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    alert("Google login requires backend OAuth integration. Please use email/password for now.");
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle(role);
+    } catch {
+      alert("Google sign-in failed. Please try again.");
+    }
   };
 
   return (

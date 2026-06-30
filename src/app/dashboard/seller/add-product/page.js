@@ -1,14 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UploadCloud, CheckCircle2 } from "lucide-react";
+import { UploadCloud, CheckCircle2, Store } from "lucide-react";
 import api from "@/lib/api";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { DEFAULT_CATEGORIES } from "@/lib/categories";
 
 const CONDITIONS = ["Used", "Like New", "Refurbished", "Good", "Fair"];
 
 export default function AddProductPage() {
+  const { user, becomeSeller } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -18,16 +22,33 @@ export default function AddProductPage() {
     title: "",
     description: "",
     price: "",
+    stock: "1",
     imageUrl: "",
   });
 
   useEffect(() => {
     api.get("/stats/categories").then(({ data }) => {
-      if (data.success) setCategories(data.data.map((c) => c.name));
+      if (data.success && data.data.length > 0) {
+        setCategories(data.data.map((c) => c.name));
+      } else {
+        setCategories(DEFAULT_CATEGORIES);
+      }
     }).catch(() => {
-      setCategories(["Electronics", "Mobile Phones", "Furniture", "Vehicles", "Fashion"]);
+      setCategories(DEFAULT_CATEGORIES);
     });
   }, []);
+
+  const handleBecomeSeller = async () => {
+    setIsUpgrading(true);
+    setError(null);
+    const result = await becomeSeller();
+    setIsUpgrading(false);
+    if (!result?.success) {
+      setError(result?.message || "Could not switch to seller account.");
+    }
+  };
+
+  const canPost = user?.role === "seller" || user?.role === "admin";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,6 +65,7 @@ export default function AddProductPage() {
         condition: formData.condition,
         description: formData.description,
         price: Number(formData.price),
+        stock: Number(formData.stock),
         images,
       });
       if (data.success) {
@@ -87,6 +109,31 @@ export default function AddProductPage() {
       <h1 className="text-2xl font-bold text-foreground mb-6 border-b pb-4">Post an Ad</h1>
       {error && <div className="p-4 bg-red-100 text-red-700 rounded mb-6">{error}</div>}
 
+      {!canPost && (
+        <div className="bg-card border rounded p-6 shadow-sm mb-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-secondary/20 rounded-full">
+              <Store className="w-6 h-6 text-secondary-foreground" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold text-foreground mb-2">Switch to a seller account</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                You are logged in as a buyer. To post ads on ReSellHub, switch your account to seller. It is free and instant.
+              </p>
+              <button
+                type="button"
+                onClick={handleBecomeSeller}
+                disabled={isUpgrading}
+                className="bg-secondary text-secondary-foreground px-6 py-2 rounded font-bold hover:bg-yellow-400 transition-colors disabled:opacity-50"
+              >
+                {isUpgrading ? "Switching..." : "Become a Seller"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {canPost && (
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="bg-card border rounded p-6 shadow-sm">
           <h2 className="text-lg font-bold text-foreground mb-4 border-b pb-2">Ad Details</h2>
@@ -164,16 +211,33 @@ export default function AddProductPage() {
         </div>
 
         <div className="bg-card border rounded p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-foreground mb-4 border-b pb-2">Price</h2>
-          <input
-            required
-            value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-            type="number"
-            min="0"
-            className="w-full md:w-1/2 px-3 py-2 border rounded text-sm bg-background"
-            placeholder="e.g. 5000"
-          />
+          <h2 className="text-lg font-bold text-foreground mb-4 border-b pb-2">Price & Stock</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Price *</label>
+              <input
+                required
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                type="number"
+                min="0"
+                className="w-full px-3 py-2 border rounded text-sm bg-background"
+                placeholder="e.g. 5000"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">Stock Quantity *</label>
+              <input
+                required
+                value={formData.stock}
+                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                type="number"
+                min="1"
+                className="w-full px-3 py-2 border rounded text-sm bg-background"
+                placeholder="e.g. 1"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-end gap-4 border-t pt-6">
@@ -189,6 +253,7 @@ export default function AddProductPage() {
           </button>
         </div>
       </form>
+      )}
     </div>
   );
 }
